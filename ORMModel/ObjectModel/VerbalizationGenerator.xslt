@@ -1066,30 +1066,7 @@
 						</plx:callInstance>
 					</plx:initialize>
 				</plx:local>
-				<plx:local name="defaultValue" dataTypeName=".string">
-					<plx:initialize>
-						<plx:inlineStatement dataTypeName=".string">
-							<plx:conditionalOperator>
-								<plx:condition>
-									<plx:binaryOperator type="equality">
-										<plx:left>
-											<plx:nameRef name="roleCount"/>
-										</plx:left>
-										<plx:right>
-											<plx:value data="1" type="i4"/>
-										</plx:right>
-									</plx:binaryOperator>
-								</plx:condition>
-								<plx:left>
-									<plx:callThis name="DefaultValue" type="property"/>
-								</plx:left>
-								<plx:right>
-									<plx:callThis name="ResolvedDefaultValue" type="property"/>
-								</plx:right>
-							</plx:conditionalOperator>
-						</plx:inlineStatement>
-					</plx:initialize>
-				</plx:local>
+				<plx:local name="defaultValue" dataTypeName=".string"/>
 				<plx:local name="unaryPopulatedByDefault" dataTypeName=".boolean">
 					<plx:initialize>
 						<plx:falseKeyword/>
@@ -1097,25 +1074,12 @@
 				</plx:local>
 				<plx:branch>
 					<plx:condition>
-						<plx:binaryOperator type="booleanAnd">
+						<plx:binaryOperator type="equality">
 							<plx:left>
-								<plx:unaryOperator type="booleanNot">
-									<plx:callStatic dataTypeName=".string" name="IsNullOrEmpty">
-										<plx:passParam>
-											<plx:nameRef name="defaultValue"/>
-										</plx:passParam>
-									</plx:callStatic>
-								</plx:unaryOperator>
+								<plx:nameRef name="roleCount"/>
 							</plx:left>
 							<plx:right>
-								<plx:binaryOperator type="equality">
-									<plx:left>
-										<plx:nameRef name="roleCount"/>
-									</plx:left>
-									<plx:right>
-										<plx:value data="1" type="i4"/>
-									</plx:right>
-								</plx:binaryOperator>
+								<plx:value data="1" type="i4"/>
 							</plx:right>
 						</plx:binaryOperator>
 					</plx:condition>
@@ -1124,7 +1088,13 @@
 							<plx:nameRef name="unaryPopulatedByDefault"/>
 						</plx:left>
 						<plx:right>
-							<plx:trueKeyword/>
+							<plx:unaryOperator type="booleanNot">
+								<plx:callStatic dataTypeName=".string" name="IsNullOrEmpty">
+									<plx:passParam>
+										<plx:callThis name="DefaultValue" type="property"/>
+									</plx:passParam>
+								</plx:callStatic>
+							</plx:unaryOperator>
 						</plx:right>
 					</plx:assign>
 					<plx:assign>
@@ -1136,6 +1106,16 @@
 						</plx:right>
 					</plx:assign>
 				</plx:branch>
+				<plx:fallbackBranch>
+					<plx:assign>
+						<plx:left>
+							<plx:nameRef name="defaultValue"/>
+						</plx:left>
+						<plx:right>
+							<plx:callThis name="ResolvedDefaultValue" type="property"/>
+						</plx:right>
+					</plx:assign>
+				</plx:fallbackBranch>
 				<plx:local name="isText" dataTypeName=".boolean">
 					<plx:initialize>
 						<plx:binaryOperator type="booleanAnd">

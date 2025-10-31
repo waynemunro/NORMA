@@ -1412,7 +1412,7 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 				@"<span class=""quantifier"">at least</span> <span class=""instance"">{0}</span>",
 				@"<span class=""quantifier"">at least</span> <span class=""instance"">{0}</span> <span class=""quantifier"">and at most</span> <span class=""instance"">{1}</span>",
 				@"<span class=""quantifier"">at most</span> <span class=""instance"">{1}</span>",
-				@"<span class=""smallIndent""><span class=""quantifier"">Each new instance of </span> {0} <span class=""quantifier"">plays this role by default.</span></span>",
+				@"<span class=""smallIndent""><span class=""quantifier"">Each new instance of </span> {0} <span class=""quantifier"">plays this role by default</span><span class=""listSeparator"">.</span></span>",
 				@"<span class=""smallIndent""><span class=""quantifier"">Default Value:</span> {0}</span>",
 				@"<span class=""quantifier"">that</span> {0}",
 				@"<span class=""quantifier"">Derivation Note:</span> <span class=""definition"">{0}</span>",
@@ -1815,7 +1815,7 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 				@"<span class=""quantifier"">at least</span> <span class=""instance"">{0}</span>",
 				@"<span class=""quantifier"">at least</span> <span class=""instance"">{0}</span> <span class=""quantifier"">and at most</span> <span class=""instance"">{1}</span>",
 				@"<span class=""quantifier"">at most</span> <span class=""instance"">{1}</span>",
-				@"<span class=""smallIndent""><span class=""quantifier"">Each new instance of </span> {0} <span class=""quantifier"">plays this role by default.</span></span>",
+				@"<span class=""smallIndent""><span class=""quantifier"">Each new instance of </span> {0} <span class=""quantifier"">plays this role by default</span><span class=""listSeparator"">.</span></span>",
 				@"<span class=""smallIndent""><span class=""quantifier"">Default Value:</span> {0}</span>",
 				@"<span class=""quantifier"">that</span> {0}",
 				@"<span class=""quantifier"">Derivation Note:</span> <span class=""definition"">{0}</span>",
@@ -2218,7 +2218,7 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 				@"<span class=""quantifier"">at least</span> <span class=""instance"">{0}</span>",
 				@"<span class=""quantifier"">at least</span> <span class=""instance"">{0}</span> <span class=""quantifier"">and at most</span> <span class=""instance"">{1}</span>",
 				@"<span class=""quantifier"">at most</span> <span class=""instance"">{1}</span>",
-				@"<span class=""smallIndent""><span class=""quantifier"">Each new instance of </span> {0} <span class=""quantifier"">plays this role by default.</span></span>",
+				@"<span class=""smallIndent""><span class=""quantifier"">Each new instance of </span> {0} <span class=""quantifier"">plays this role by default</span><span class=""listSeparator"">.</span></span>",
 				@"<span class=""smallIndent""><span class=""quantifier"">Default Value:</span> {0}</span>",
 				@"<span class=""quantifier"">that</span> {0}",
 				@"<span class=""quantifier"">Derivation Note:</span> <span class=""definition"">{0}</span>",
@@ -2621,7 +2621,7 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 				@"<span class=""quantifier"">at least</span> <span class=""instance"">{0}</span>",
 				@"<span class=""quantifier"">at least</span> <span class=""instance"">{0}</span> <span class=""quantifier"">and at most</span> <span class=""instance"">{1}</span>",
 				@"<span class=""quantifier"">at most</span> <span class=""instance"">{1}</span>",
-				@"<span class=""smallIndent""><span class=""quantifier"">Each new instance of </span> {0} <span class=""quantifier"">plays this role by default.</span></span>",
+				@"<span class=""smallIndent""><span class=""quantifier"">Each new instance of </span> {0} <span class=""quantifier"">plays this role by default</span><span class=""listSeparator"">.</span></span>",
 				@"<span class=""smallIndent""><span class=""quantifier"">Default Value:</span> {0}</span>",
 				@"<span class=""quantifier"">that</span> {0}",
 				@"<span class=""quantifier"">Derivation Note:</span> <span class=""definition"">{0}</span>",
@@ -3628,12 +3628,16 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 			int subscript = 0;
 			IList<RoleBase> orderedRoles = this.FactType.GetDefaultReading().RoleCollection;
 			int roleCount = orderedRoles.Count;
-			string defaultValue = roleCount == 1 ? this.DefaultValue : this.ResolvedDefaultValue;
+			string defaultValue;
 			bool unaryPopulatedByDefault = false;
-			if (!string.IsNullOrEmpty(defaultValue) && roleCount == 1)
+			if (roleCount == 1)
 			{
-				unaryPopulatedByDefault = true;
+				unaryPopulatedByDefault = !string.IsNullOrEmpty(this.DefaultValue);
 				defaultValue = null;
+			}
+			else
+			{
+				defaultValue = this.ResolvedDefaultValue;
 			}
 			bool isText = defaultValue != null && this.DefaultValueValueTypeDetachedError == null && rolePlayer.SingleValueDataType is TextDataType;
 			bool pastMatch = false;

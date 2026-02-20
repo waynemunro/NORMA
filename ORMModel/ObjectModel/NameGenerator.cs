@@ -123,8 +123,11 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 		}
 		private void SetCasingOptionValue(NameGeneratorCasingOption value)
 		{
-			Debug.Assert(value != NameGeneratorCasingOption.Uninitialized || Store.InUndoRedoOrRollback, "Do not set CasingOption to Uninitialized");
-			myFlags = (NameGeneratorFlags)(((int)myFlags & ~(int)(NameGeneratorFlags.CasingOptionInit | NameGeneratorFlags.CasingOptionBit1 | NameGeneratorFlags.CasingOptionBit2 | NameGeneratorFlags.CasingOptionBit3)) | ((int)value << 6) | (int)NameGeneratorFlags.CasingOptionInit);
+			if (value != NameGeneratorCasingOption.Uninitialized || Store.InUndoRedoOrRollback)
+			{
+				// The CasingOption should not be set to uninitialized
+				myFlags = (NameGeneratorFlags)(((int)myFlags & ~(int)(NameGeneratorFlags.CasingOptionInit | NameGeneratorFlags.CasingOptionBit1 | NameGeneratorFlags.CasingOptionBit2 | NameGeneratorFlags.CasingOptionBit3)) | ((int)value << 6) | (int)NameGeneratorFlags.CasingOptionInit);
+			}
 		}
 		private NameGeneratorSpacingFormat GetSpacingFormatValue()
 		{
@@ -134,8 +137,11 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 		}
 		private void SetSpacingFormatValue(NameGeneratorSpacingFormat value)
 		{
-			Debug.Assert(value != NameGeneratorSpacingFormat.Uninitialized || Store.InUndoRedoOrRollback, "Do not set SpacingFormat to Uninitialized");
-			myFlags = (NameGeneratorFlags)(((int)myFlags & ~(int)(NameGeneratorFlags.SpacingFormatInit | NameGeneratorFlags.SpacingFormatBit1 | NameGeneratorFlags.SpacingFormatBit2)) | ((int)value << 9) | (int)NameGeneratorFlags.SpacingFormatInit);
+			if (value != NameGeneratorSpacingFormat.Uninitialized || Store.InUndoRedoOrRollback)
+			{
+				// The SpacingFormat should not be set to Unitialized
+				myFlags = (NameGeneratorFlags)(((int)myFlags & ~(int)(NameGeneratorFlags.SpacingFormatInit | NameGeneratorFlags.SpacingFormatBit1 | NameGeneratorFlags.SpacingFormatBit2)) | ((int)value << 9) | (int)NameGeneratorFlags.SpacingFormatInit);
+			}
 		}
 		private NameGeneratorUninitializedBoolean GetAutomaticallyShortenNamesInitializerValue()
 		{
@@ -145,15 +151,17 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 		}
 		private void SetAutomaticallyShortenNamesInitializerValue(NameGeneratorUninitializedBoolean value)
 		{
-			Debug.Assert(value != NameGeneratorUninitializedBoolean.Uninitialized || Store.InUndoRedoOrRollback, "Do not set AutomaticallyShortenNamesInitializer to Uninitialized");
-			if (value == NameGeneratorUninitializedBoolean.@true)
-			{
-				SetFlag(NameGeneratorFlags.AutomaticallyShortenNames | NameGeneratorFlags.AutomaticallyShortenNamesInit, true);
-			}
-			else
-			{
-				SetFlag(NameGeneratorFlags.AutomaticallyShortenNamesInit, true);
-				SetFlag(NameGeneratorFlags.AutomaticallyShortenNames, false);
+			if (value != NameGeneratorUninitializedBoolean.Uninitialized || Store.InUndoRedoOrRollback) {
+				// Do not set AutomaticallyShortenNamesInitializer to Uninitialized
+				if (value == NameGeneratorUninitializedBoolean.@true)
+				{
+					SetFlag(NameGeneratorFlags.AutomaticallyShortenNames | NameGeneratorFlags.AutomaticallyShortenNamesInit, true);
+				}
+				else
+				{
+					SetFlag(NameGeneratorFlags.AutomaticallyShortenNamesInit, true);
+					SetFlag(NameGeneratorFlags.AutomaticallyShortenNames, false);
+				}
 			}
 		}
 		private bool GetAutomaticallyShortenNamesValue()
@@ -162,8 +170,10 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 		}
 		private void SetAutomaticallyShortenNamesValue(bool value)
 		{
-			Debug.Assert(GetFlag(NameGeneratorFlags.AutomaticallyShortenNamesInit) || Store.InUndoRedoOrRollback);
-			SetFlag(NameGeneratorFlags.AutomaticallyShortenNames, value);
+			if (GetFlag(NameGeneratorFlags.AutomaticallyShortenNamesInit) || Store.InUndoRedoOrRollback)
+			{
+				SetFlag(NameGeneratorFlags.AutomaticallyShortenNames, value);
+			}
 		}
 		private NameGeneratorUninitializedBoolean GetUseTargetDefaultMaximumInitializerValue()
 		{
@@ -173,15 +183,18 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 		}
 		private void SetUseTargetDefaultMaximumInitializerValue(NameGeneratorUninitializedBoolean value)
 		{
-			Debug.Assert(value != NameGeneratorUninitializedBoolean.Uninitialized || Store.InUndoRedoOrRollback, "Do not set UseTargetDefaultMaximumInitializer to Uninitialized");
-			if (value == NameGeneratorUninitializedBoolean.@true)
+			if (value != NameGeneratorUninitializedBoolean.Uninitialized || Store.InUndoRedoOrRollback)
 			{
-				SetFlag(NameGeneratorFlags.UseTargetDefaultMaximum | NameGeneratorFlags.UseTargetDefaultMaximumInit, true);
-			}
-			else
-			{
-				SetFlag(NameGeneratorFlags.UseTargetDefaultMaximumInit, true);
-				SetFlag(NameGeneratorFlags.UseTargetDefaultMaximum, false);
+				// Do not set UseTargetDefaultMaximumInitializer to Uninitialized
+				if (value == NameGeneratorUninitializedBoolean.@true)
+				{
+					SetFlag(NameGeneratorFlags.UseTargetDefaultMaximum | NameGeneratorFlags.UseTargetDefaultMaximumInit, true);
+				}
+				else
+				{
+					SetFlag(NameGeneratorFlags.UseTargetDefaultMaximumInit, true);
+					SetFlag(NameGeneratorFlags.UseTargetDefaultMaximum, false);
+				}
 			}
 		}
 		private bool GetUseTargetDefaultMaximumValue()
@@ -190,8 +203,10 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 		}
 		private void SetUseTargetDefaultMaximumValue(bool value)
 		{
-			Debug.Assert(GetFlag(NameGeneratorFlags.UseTargetDefaultMaximumInit) || Store.InUndoRedoOrRollback);
-			SetFlag(NameGeneratorFlags.UseTargetDefaultMaximum, value);
+			if (GetFlag(NameGeneratorFlags.UseTargetDefaultMaximumInit) || Store.InUndoRedoOrRollback)
+			{
+				SetFlag(NameGeneratorFlags.UseTargetDefaultMaximum, value);
+			}
 		}
 
 		private int myUserDefinedMaximum = int.MinValue;

@@ -178,6 +178,28 @@ namespace ORMSolutions.ORMArchitect.ORMToORMAbstractionBridge
 				}
 				return false;
 			}
+			private static bool IsFactTypeIgnoredForDerivationState(FactType factType)
+			{
+				FactTypeDerivationRule rule;
+				FactTypeDerivationExpression expression;
+				if (null != (rule = factType.DerivationRule as FactTypeDerivationRule))
+				{
+					if (rule.DerivationCompleteness == DerivationCompleteness.FullyDerived &&
+						(!rule.ExternalDerivation || rule.DerivationStorage == DerivationStorage.NotStored))
+					{
+						return true;
+					}
+				}
+				else if (null != (expression = factType.DerivationExpression))
+				{
+					if (expression.DerivationStorage == DerivationExpressionStorageType.Derived)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+
 			/// <summary>
 			/// Determine if an <see cref="FactType"/> should be considered during
 			/// absorption. Considers the state of the FactType, and the current exclusion
@@ -199,22 +221,42 @@ namespace ORMSolutions.ORMArchitect.ORMToORMAbstractionBridge
 					if (!(factType is SubtypeFact))
 					{
 						// Ignore non-stored derived fact types
-						FactTypeDerivationRule rule;
-						FactTypeDerivationExpression expression;
-						if (null != (rule = factType.DerivationRule as FactTypeDerivationRule))
+						if (IsFactTypeIgnoredForDerivationState(factType))
 						{
-							if (rule.DerivationCompleteness == DerivationCompleteness.FullyDerived &&
-								(!rule.ExternalDerivation || rule.DerivationStorage == DerivationStorage.NotStored))
-							{
-								return false;
-							}
+							return false;
 						}
-						else if (null != (expression = factType.DerivationExpression))
+
+						// In the special case where the fact type is a unary pair and the opposite
+						// fact type is derived, we also do not want to allow the fact type. In this
+						// case the derivation of one state also determines the other state. If the
+						// fact types are not mandatory, then a 'not true' for both derivations would
+						// imply the undefined state, not the opposite state.
+						FactType oppositeUnary = null;
+						switch (factType.UnaryPattern)
 						{
-							if (expression.DerivationStorage == DerivationExpressionStorageType.Derived)
-							{
-								return false;
-							}
+							case UnaryValuePattern.Negation:
+								oppositeUnary = factType.PositiveUnaryFactType;
+								switch (oppositeUnary.UnaryPattern)
+								{
+									case UnaryValuePattern.RequiredWithNegation:
+									case UnaryValuePattern.RequiredWithNegationDefaultTrue:
+									case UnaryValuePattern.RequiredWithNegationDefaultFalse:
+										break;
+									default:
+										oppositeUnary = null;
+										break;
+								}
+								break;
+							case UnaryValuePattern.RequiredWithNegation:
+							case UnaryValuePattern.RequiredWithNegationDefaultTrue:
+							case UnaryValuePattern.RequiredWithNegationDefaultFalse:
+								oppositeUnary = factType.NegationUnaryFactType;
+								break;
+						}
+
+						if (oppositeUnary != null && IsFactTypeIgnoredForDerivationState(oppositeUnary))
+						{
+							return false;
 						}
 					}
 					foreach (RoleBase role in factType.RoleCollection)
@@ -955,6 +997,67 @@ namespace ORMSolutions.ORMArchitect.ORMToORMAbstractionBridge
 					if (!(factType is SubtypeFact))
 					{
 						FilterModifiedFactType(factType, true, false);
+					}
+				}
+			}
+			/// <summary>
+			/// ChangeRule: typeof(ORMSolutions.ORMArchitect.Core.ObjectModel.FactType)
+			/// Paired mandatory unary fact types where one or the other is fully derived
+			/// should both be fully ignored
+			/// </summary>
+			private static void FactTypeChangedRule(ElementPropertyChangedEventArgs e)
+			{
+				Guid propertyId = e.DomainProperty.Id;
+				if (e.DomainProperty.Id == FactType.UnaryPatternDomainPropertyId)
+				{
+					FactType factType = (FactType)e.ModelElement;
+					bool isPaired = true;
+					bool isMandatory = false;
+					switch (factType.UnaryPattern)
+					{
+						case UnaryValuePattern.NotUnary:
+						case UnaryValuePattern.Negation: // Negation does not change, handle everything from the positive side of the pairing
+						case UnaryValuePattern.OptionalWithoutNegation:
+						case UnaryValuePattern.OptionalWithoutNegationDefaultTrue:
+							isPaired = false;
+							break;
+						case UnaryValuePattern.RequiredWithNegation:
+						case UnaryValuePattern.RequiredWithNegationDefaultTrue:
+						case UnaryValuePattern.RequiredWithNegationDefaultFalse:
+							isMandatory = true;
+							break;
+					}
+
+					if (isPaired)
+					{
+						bool wasMandatory = false;
+						switch ((UnaryValuePattern)e.OldValue)
+						{
+							case UnaryValuePattern.RequiredWithNegation:
+							case UnaryValuePattern.RequiredWithNegationDefaultTrue:
+							case UnaryValuePattern.RequiredWithNegationDefaultFalse:
+								wasMandatory = true;
+								break;
+						}
+
+						if (wasMandatory != isMandatory)
+						{
+							FactType negationUnary = factType.NegationUnaryFactType;
+							if (negationUnary != null)
+							{
+								if (IsFactTypeIgnoredForDerivationState(factType))
+								{
+									if (!IsFactTypeIgnoredForDerivationState(negationUnary))
+									{
+										FilterModifiedFactType(negationUnary, true, false);
+									}
+								}
+								else if (IsFactTypeIgnoredForDerivationState(negationUnary))
+								{
+									FilterModifiedFactType(factType, true, false);
+								}
+							}
+						}
 					}
 				}
 			}

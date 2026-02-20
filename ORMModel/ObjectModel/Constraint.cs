@@ -365,8 +365,8 @@ namespace ORMSolutions.ORMArchitect.Core.ObjectModel
 		public bool TestModality(ConstraintModality contextModality, ConstraintModality intersectingModality)
 		{
 			bool retVal = true;
-			IntersectingConstraintPatternOptions options = myPatternOptions;
-			if (0 != (options & IntersectingConstraintPatternOptions.IntersectingConstraintModalityMask))
+			IntersectingConstraintPatternOptions options = myPatternOptions & IntersectingConstraintPatternOptions.IntersectingConstraintModalityMask;
+			if (0 != options)
 			{
 				if ((0 != (options & IntersectingConstraintPatternOptions.ContextConstraintAlethic) && contextModality != ConstraintModality.Alethic) ||
 					(0 != (options & IntersectingConstraintPatternOptions.IntersectingConstraintAlethic) && intersectingModality != ConstraintModality.Alethic))
